@@ -14,12 +14,12 @@ export const SAMPLE_JSON = {
     {
       "id": 101,
       "product": "Laptop",
-      "price": 999.99
+      "price": 99999.99
     },
     {
       "id": 102,
       "product": "Mouse",
-      "price": 29.99
+      "price": 2999.99
     }
   ],
 

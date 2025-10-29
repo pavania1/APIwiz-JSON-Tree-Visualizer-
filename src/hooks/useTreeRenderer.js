@@ -51,7 +51,6 @@ export const useTreeRenderer = (treeData, highlightedPath, darkMode) => {
 
   const fitView = () => {
     if (zoomRef.current && svgRef.current && containerRef.current) {
-      const width = containerRef.current.clientWidth;
       const height = containerRef.current.clientHeight;
       const initialTransform = d3.zoomIdentity.translate(150, height / 2).scale(0.8);
       d3.select(svgRef.current)

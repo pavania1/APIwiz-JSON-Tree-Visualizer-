@@ -10,7 +10,7 @@ import { useTheme } from './hooks/useTheme';
 
 export default function App() {
   const { darkMode, toggleTheme, theme } = useTheme();
-  const { treeData, error, visualize, clear } = useJSONParser();
+  const { treeData, visualize, clear } = useJSONParser();
   const { 
     searchPath, 
     setSearchPath, 
