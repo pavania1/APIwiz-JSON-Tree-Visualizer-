@@ -29,7 +29,7 @@ export default function App() {
     <div className={`min-h-screen ${theme.bgColor} ${theme.textColor} transition-colors duration-200`}>
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">JSON Tree Visualizer</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">JSON Tree Visualizer</h1>
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-lg ${theme.cardBg} border ${theme.borderColor} hover:opacity-80 transition-opacity`}
@@ -38,8 +38,8 @@ export default function App() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          <div className="lg:col-span-1 space-y-4 sm:space-y-0">
             <JSONInput 
               onVisualize={visualize}
               onClear={handleClear}

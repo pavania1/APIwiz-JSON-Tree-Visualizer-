@@ -39,7 +39,15 @@ export const createD3Tree = (svg, data, options = {}) => {
   svgSelection.call(zoom);
 
   // Create tree layout
-  const treeLayout = d3.tree().size([height - 100, width - 300]);
+   // Adjust tree layout based on screen size
+  const isMobile = width < 768;
+  const nodeWidth = isMobile ? 140 : 250;
+  const nodeHeight = isMobile ? 80 : 100;
+
+ const treeLayout = d3.tree()
+    .size([height - 100, width - (isMobile ? 180 : 300)])
+    .separation((a, b) => (a.parent === b.parent ? 1 : 1.2));
+
   const root = d3.hierarchy(data);
   treeLayout(root);
 
@@ -53,7 +61,8 @@ export const createD3Tree = (svg, data, options = {}) => {
       .y(d => d.x))
     .attr('fill', 'none')
     .attr('stroke', darkMode ? '#6B7280' : '#9CA3AF')
-    .attr('stroke-width', 2);
+    .attr('stroke-width', isMobile ? 2.5 :2)
+    .attr('opacity', 0.6);
 
   // Draw nodes
   const node = g.selectAll('.node')
@@ -66,17 +75,24 @@ export const createD3Tree = (svg, data, options = {}) => {
       if (onNodeClick) onNodeClick(d.data);
     });
 
+     // Adjust node size based on screen
+  const rectWidth = isMobile ? 110 : 120;
+  const rectHeight = isMobile ? 45 : 50;
+  const rectX = isMobile ? -55 : -60;
+  const rectY = isMobile ? -22.5 : -25;
+
   // Node rectangles
   node.append('rect')
-    .attr('x', -60)
-    .attr('y', -25)
-    .attr('width', 120)
-    .attr('height', 50)
+    .attr('x', rectX)
+    .attr('y', rectY)
+    .attr('width', rectWidth)
+    .attr('height', rectHeight)
     .attr('rx', 8)
     .attr('fill', d => getNodeColor(d.data.type, d.data.path === highlightPath))
     .attr('stroke', d => getNodeBorderColor(d.data.type, d.data.path === highlightPath))
-    .attr('stroke-width', 2)
+    .attr('stroke-width', isMobile ? 2.5 : 2)
     .style('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))');
+
 
   // Node labels
   node.append('text')
@@ -84,8 +100,11 @@ export const createD3Tree = (svg, data, options = {}) => {
     .attr('text-anchor', 'middle')
     .attr('fill', 'white')
     .attr('font-weight', 'bold')
-    .attr('font-size', '12px')
-    .text(d => d.data.name.length > 15 ? d.data.name.substring(0, 15) + '...' : d.data.name);
+    .attr('font-size', isMobile ? '10px' : '12px')
+    .text(d => {
+      const maxLen = isMobile ? 12 : 15;
+      return d.data.name.length > maxLen ? d.data.name.substring(0, maxLen) + '...' : d.data.name;
+    });
 
   // Node values
   node.filter(d => d.data.value !== undefined)
@@ -93,11 +112,12 @@ export const createD3Tree = (svg, data, options = {}) => {
     .attr('dy', 12)
     .attr('text-anchor', 'middle')
     .attr('fill', 'white')
-    .attr('font-size', '10px')
+    .attr('font-size', isMobile ? '8px' : '10px')
     .attr('opacity', 0.9)
     .text(d => {
       const val = String(d.data.value);
-      return val.length > 18 ? val.substring(0, 18) + '...' : val;
+      const maxLen = isMobile ? 14 : 18;
+      return val.length > maxLen ? val.substring(0, maxLen) + '...' : val;
     });
 
   // Tooltips
@@ -105,7 +125,9 @@ export const createD3Tree = (svg, data, options = {}) => {
     .text(d => `Path: ${d.data.path}\nType: ${d.data.type}${d.data.value !== undefined ? `\nValue: ${d.data.value}` : ''}`);
 
   // Initial transform
-  const initialTransform = d3.zoomIdentity.translate(150, height / 2).scale(0.8);
+ const initialScale = isMobile ? 0.6 : 0.8;
+  const initialX = isMobile ? 80 : 150;
+  const initialTransform = d3.zoomIdentity.translate(initialX, height / 2).scale(initialScale);
   svgSelection.call(zoom.transform, initialTransform);
 
   // Highlight and center if path is provided
