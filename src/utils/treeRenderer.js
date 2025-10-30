@@ -38,21 +38,40 @@ export const createD3Tree = (svg, data, options = {}) => {
 
   svgSelection.call(zoom);
 
-  // Create tree layout
-   // Adjust tree layout based on screen size
+  // Adjust tree layout based on screen size
   const isMobile = width < 768;
-  const nodeWidth = isMobile ? 140 : 250;
-  const nodeHeight = isMobile ? 80 : 100;
-
- const treeLayout = d3.tree()
-    .size([height - 100, width - (isMobile ? 180 : 300)])
-    .separation((a, b) => (a.parent === b.parent ? 1 : 1.2));
+  
+  // Calculate tree dimensions based on data size
+  const countNodes = (node) => {
+    if (!node.children) return 1;
+    return 1 + node.children.reduce((sum, child) => sum + countNodes(child), 0);
+  };
+  
+  const totalNodes = countNodes(data);
+  const minHeight = totalNodes * (isMobile ? 70 : 90); 
+  const treeHeight = Math.max(height - 100, minHeight);
+  
+  const treeLayout = d3.tree()
+    .size([treeHeight, width - (isMobile ? 180 : 300)])
+    .separation((a, b) => {
+      // Increase separation between nodes
+      if (a.parent === b.parent) {
+        return isMobile ? 1.5 : 1.2;
+      }
+      return isMobile ? 2 : 1.5;
+    });
 
   const root = d3.hierarchy(data);
   treeLayout(root);
 
-  // Draw links
-  g.selectAll('.link')
+  // Create a group for links (drawn first, so they appear behind nodes)
+  const linkGroup = g.append('g').attr('class', 'links');
+  
+  // Create a group for nodes (drawn second, so they appear in front)
+  const nodeGroup = g.append('g').attr('class', 'nodes');
+
+  // Draw links with better visibility
+  linkGroup.selectAll('.link')
     .data(root.links())
     .enter().append('path')
     .attr('class', 'link')
@@ -60,12 +79,13 @@ export const createD3Tree = (svg, data, options = {}) => {
       .x(d => d.y)
       .y(d => d.x))
     .attr('fill', 'none')
-    .attr('stroke', darkMode ? '#6B7280' : '#9CA3AF')
-    .attr('stroke-width', isMobile ? 2.5 :2)
-    .attr('opacity', 0.6);
+    .attr('stroke', darkMode ? '#D1D5DB' : '#4B5563')
+    .attr('stroke-width', isMobile ? 3 : 2.5)
+    .attr('opacity', 0.8)
+    .style('pointer-events', 'none');
 
   // Draw nodes
-  const node = g.selectAll('.node')
+  const node = nodeGroup.selectAll('.node')
     .data(root.descendants())
     .enter().append('g')
     .attr('class', 'node')
@@ -75,7 +95,7 @@ export const createD3Tree = (svg, data, options = {}) => {
       if (onNodeClick) onNodeClick(d.data);
     });
 
-     // Adjust node size based on screen
+  // Adjust node size based on screen
   const rectWidth = isMobile ? 110 : 120;
   const rectHeight = isMobile ? 45 : 50;
   const rectX = isMobile ? -55 : -60;
@@ -92,7 +112,6 @@ export const createD3Tree = (svg, data, options = {}) => {
     .attr('stroke', d => getNodeBorderColor(d.data.type, d.data.path === highlightPath))
     .attr('stroke-width', isMobile ? 2.5 : 2)
     .style('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))');
-
 
   // Node labels
   node.append('text')
@@ -124,9 +143,9 @@ export const createD3Tree = (svg, data, options = {}) => {
   node.append('title')
     .text(d => `Path: ${d.data.path}\nType: ${d.data.type}${d.data.value !== undefined ? `\nValue: ${d.data.value}` : ''}`);
 
-  // Initial transform
- const initialScale = isMobile ? 0.6 : 0.8;
-  const initialX = isMobile ? 80 : 150;
+  // Initial transform with better positioning for mobile
+  const initialScale = isMobile ? 0.5 : 0.7; 
+  const initialX = isMobile ? 60 : 120;
   const initialTransform = d3.zoomIdentity.translate(initialX, height / 2).scale(initialScale);
   svgSelection.call(zoom.transform, initialTransform);
 

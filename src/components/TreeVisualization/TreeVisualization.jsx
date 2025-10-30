@@ -25,7 +25,7 @@ export const TreeVisualization = ({
   return (
     <div 
       className={`${cardBg} rounded-lg shadow-lg border ${borderColor} relative`} 
-      style={{ height: '600px' }}
+ style={{ height: '700px' }}
     >
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         <IconButton icon={ZoomIn} onClick={zoomIn} title="Zoom In" />
